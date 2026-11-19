@@ -41,9 +41,9 @@ UTF-8, один запис у рядку, поля розділено крапк
 ```text
 ./mvnw verify          # macOS / Ubuntu: компіляція, тести, JAR, SpotBugs
 mvnw.cmd verify        # Windows
-java -jar target/lab01-1.0.0.jar --version
-java -jar target/lab01-1.0.0.jar
-java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-1.1.0.jar --version
+java -jar target/lab01-1.1.0.jar
+java -jar target/lab01-1.1.0.jar --input data/input.csv --output out/report.txt
 ```
 
 Параметри: `--help`, `--version` (версія з номером збірки, наприклад `1.0.0+local` локально
@@ -51,6 +51,21 @@ java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
 
 Коди завершення: `0` — успіх; `1` — у файлі немає жодного коректного запису; `2` — хибні
 аргументи або помилка читання/запису файла.
+
+## Модель даних (лабораторна робота № 2)
+
+| Тип | Призначення |
+| --- | --- |
+| `Training` | клас-сутність: `private final` поля, конструктор перевіряє інваріанти, статична фабрика `fromCsv(String)`, геттери, `toString` (`Locale.ROOT`) |
+| `DurationDistance` | `record`: сумарний час і сумарна дистанція |
+| `TrainingSummary` | `record`: `count`, `totals` (`DurationDistance`), `maxCalories` |
+| `TrainingAnalyzer` | обчислює `TrainingSummary` за списком `Training` |
+| `TrainingStats` | збирає коректні `Training` і повідомлення про помилки (API з лабораторної № 1 збережено) |
+
+Правила валідації (конструктор): дата й вид не `null` і не порожні; `minutes >= 0`;
+`distanceKm >= 0` і скінченне; `calories >= 0`. Фабрика `fromCsv` відповідає за кількість полів
+і розбір чисел, конструктор — за інваріанти, тому правила не можна обійти.
+Зовнішній звіт не змінився (еталон: `src/test/resources/golden/report-lab01.txt`).
 
 ## Приклад
 
@@ -71,8 +86,9 @@ java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
 
 ```text
 ├── data/input.csv                     # контрольні дані (5 коректних і 4 хибні рядки)
-├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, TrainingStats, ReportFormatter,
-│                                      # FileReport, BuildInfo
+├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, Training, DurationDistance,
+│                                      # TrainingSummary, TrainingAnalyzer, TrainingStats,
+│                                      # ReportFormatter, FileReport, BuildInfo
 ├── src/main/resources/version.properties
 ├── src/test/java/ua/lpnu/kzp/         # тести JUnit 5
 ├── src/test/resources/golden/         # еталонний звіт для порівняння поведінки

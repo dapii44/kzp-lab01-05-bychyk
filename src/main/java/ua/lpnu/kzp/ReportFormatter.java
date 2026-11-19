@@ -12,22 +12,34 @@ public final class ReportFormatter {
     /**
      * Будує текст звіту за накопиченими показниками.
      *
-     * <p>Числа форматуються з {@link Locale#ROOT}, щоб десятковим роздільником завжди була
-     * крапка незалежно від налаштувань Windows, macOS або Ubuntu.
-     *
      * @param stats накопичені показники
      * @return готовий текст звіту
      */
     public static String format(TrainingStats stats) {
+        return format(stats.summary(), stats.errors());
+    }
+
+    /**
+     * Будує текст звіту за незмінним підсумком і списком помилок.
+     *
+     * <p>Числа форматуються з {@link Locale#ROOT}, щоб десятковим роздільником завжди була
+     * крапка незалежно від налаштувань Windows, macOS або Ubuntu. Формат не змінився з
+     * лабораторної роботи № 1.
+     *
+     * @param summary підсумок із чотирьох показників
+     * @param errors повідомлення про пропущені рядки
+     * @return готовий текст звіту
+     */
+    public static String format(TrainingSummary summary, List<String> errors) {
         StringBuilder report = new StringBuilder();
         report.append(String.format(Locale.ROOT, "Звіт про тренування%n"));
-        report.append(String.format(Locale.ROOT, "Коректних записів: %d%n", stats.validCount()));
-        report.append(String.format(Locale.ROOT, "Сумарний час: %d хв%n", stats.totalMinutes()));
+        report.append(String.format(Locale.ROOT, "Коректних записів: %d%n", summary.count()));
+        report.append(String.format(Locale.ROOT, "Сумарний час: %d хв%n",
+                summary.totals().totalMinutes()));
         report.append(String.format(Locale.ROOT, "Сумарна дистанція: %.2f км%n",
-                stats.totalDistanceKm()));
+                summary.totals().totalDistanceKm()));
         report.append(String.format(Locale.ROOT, "Найбільша витрата калорій: %d ккал%n",
-                stats.maxCalories()));
-        List<String> errors = stats.errors();
+                summary.maxCalories()));
         report.append(String.format(Locale.ROOT, "Помилок: %d%n", errors.size()));
         for (String error : errors) {
             report.append(error).append(String.format(Locale.ROOT, "%n"));

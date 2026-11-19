@@ -4,85 +4,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Накопичує показники тренувань за рядками CSV.
+ * Накопичує коректні тренування та повідомлення про пропущені рядки.
  *
- * <p>Лабораторна робота № 1: запис існує лише як рядок і набір локальних змінних.
- * Формат рядка: {@code дата;вид;хвилини;дистанція_км;калорії}.
+ * <p>Лабораторна робота № 2: розбір і перевірку виконує {@link Training#fromCsv(String)}, а
+ * показники обчислює {@link TrainingAnalyzer}. Публічний інтерфейс класу збережено з
+ * лабораторної роботи № 1, тому попередні тести проходять без змін.
  */
 public final class TrainingStats {
-    private static final int FIELD_COUNT = 5;
-
-    private int validCount;
-    private long totalMinutes;
-    private double totalDistanceKm;
-    private int maxCalories;
+    private final List<Training> trainings = new ArrayList<>();
     private final List<String> errors = new ArrayList<>();
 
     /**
-     * Перевіряє один рядок і, якщо він коректний, додає його до показників.
+     * Перевіряє один рядок і, якщо він коректний, додає тренування до списку.
      *
-     * <p>Хибний рядок не змінює показників і не перериває обробку: причина разом із номером
-     * рядка зберігається в списку помилок.
+     * <p>Хибний рядок не потрапляє до списку, не змінює показників і не перериває обробку: причина
+     * разом із номером рядка зберігається в списку помилок.
      *
      * @param lineNumber номер рядка у файлі, починаючи з 1
      * @param line текст рядка
      */
     public void accept(int lineNumber, String line) {
-        int minutes;
-        double distanceKm;
-        int calories;
-        try {
-            if (line == null || line.isBlank()) {
-                throw new IllegalArgumentException("порожній рядок");
-            }
-            // -1 зберігає порожнє останнє поле, тому "a;b;" має три поля.
-            String[] fields = line.split(";", -1);
-            if (fields.length != FIELD_COUNT) {
-                throw new IllegalArgumentException(
-                        "очікується %d полів, отримано %d".formatted(FIELD_COUNT, fields.length));
-            }
-            if (fields[0].isBlank() || fields[1].isBlank()) {
-                throw new IllegalArgumentException("порожня дата або вид тренування");
-            }
-            minutes = parseInt(fields[2], "minutes");
-            distanceKm = parseDouble(fields[3], "distanceKm");
-            calories = parseInt(fields[4], "calories");
-            if (minutes < 0 || distanceKm < 0 || calories < 0) {
-                throw new IllegalArgumentException("від'ємне числове значення");
-            }
-        } catch (IllegalArgumentException exception) {
-            errors.add("Рядок %d: %s".formatted(lineNumber, exception.getMessage()));
+        if (line == null) {
+            errors.add("Рядок %d: порожній рядок".formatted(lineNumber));
             return;
         }
-        // До статистики потрапляють лише записи, які пройшли всі перевірки.
-        validCount++;
-        totalMinutes += minutes;
-        totalDistanceKm += distanceKm;
-        maxCalories = Math.max(maxCalories, calories);
-    }
-
-    /* Перетворює текст на ціле число й додає назву поля до повідомлення. */
-    private static int parseInt(String text, String field) {
         try {
-            return Integer.parseInt(text.trim());
-        } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException(
-                    "поле %s має помилковий формат".formatted(field), exception);
+            // Перевірка виконується до додавання в список і до зміни статистики.
+            trainings.add(Training.fromCsv(line));
+        } catch (IllegalArgumentException exception) {
+            errors.add("Рядок %d: %s".formatted(lineNumber, exception.getMessage()));
         }
     }
 
-    /* Перетворює текст на скінченне число з крапкою й додає назву поля до повідомлення. */
-    private static double parseDouble(String text, String field) {
-        try {
-            double value = Double.parseDouble(text.trim());
-            if (!Double.isFinite(value)) {
-                throw new NumberFormatException("не є скінченним числом");
-            }
-            return value;
-        } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException(
-                    "поле %s має помилковий формат".formatted(field), exception);
-        }
+    /**
+     * Повертає незмінний підсумок за накопиченими тренуваннями.
+     *
+     * @return кількість, сумарний час і дистанція, найбільша витрата калорій
+     */
+    public TrainingSummary summary() {
+        return TrainingAnalyzer.summarize(trainings);
+    }
+
+    /**
+     * Повертає копію списку коректних тренувань у порядку рядків файла.
+     *
+     * @return тренування, що пройшли перевірку
+     */
+    public List<Training> trainings() {
+        return List.copyOf(trainings);
     }
 
     /**
@@ -91,7 +60,7 @@ public final class TrainingStats {
      * @return кількість записів, що пройшли перевірку
      */
     public int validCount() {
-        return validCount;
+        return summary().count();
     }
 
     /**
@@ -100,7 +69,7 @@ public final class TrainingStats {
      * @return сума хвилин
      */
     public long totalMinutes() {
-        return totalMinutes;
+        return summary().totals().totalMinutes();
     }
 
     /**
@@ -109,7 +78,7 @@ public final class TrainingStats {
      * @return сума кілометрів
      */
     public double totalDistanceKm() {
-        return totalDistanceKm;
+        return summary().totals().totalDistanceKm();
     }
 
     /**
@@ -118,7 +87,7 @@ public final class TrainingStats {
      * @return максимум калорій або 0, якщо коректних записів немає
      */
     public int maxCalories() {
-        return maxCalories;
+        return summary().maxCalories();
     }
 
     /**
