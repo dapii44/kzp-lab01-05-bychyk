@@ -169,7 +169,6 @@ Repository<T> → @CsvColumn → CsvExporter (рефлексія) → UTF-8 CSV 
 ├── src/test/java/ua/lpnu/kzp/         # тести JUnit 5
 ├── src/test/resources/golden/         # еталонний звіт для порівняння поведінки
 ├── .github/workflows/ci.yml           # CI на Ubuntu, Windows, macOS
-├── ai/                                # ролі агента ШІ
 └── REPORT.md                          # звіт
 ```
 
