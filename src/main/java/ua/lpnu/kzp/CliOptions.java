@@ -3,6 +3,7 @@ package ua.lpnu.kzp;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 /** Зберігає розібрані аргументи командного рядка. */
 public final class CliOptions {
@@ -13,16 +14,18 @@ public final class CliOptions {
     private final boolean details;
     private final boolean queries;
     private final LocalDate findDate;
+    private final Path export;
     private final Path input;
     private final Path output;
 
     /* Створює набір параметрів; використовується лише методом parse. */
     private CliOptions(boolean help, boolean details, boolean queries, LocalDate findDate,
-            Path input, Path output) {
+            Path export, Path input, Path output) {
         this.help = help;
         this.details = details;
         this.queries = queries;
         this.findDate = findDate;
+        this.export = export;
         this.input = input;
         this.output = output;
     }
@@ -41,6 +44,7 @@ public final class CliOptions {
         boolean details = false;
         boolean queries = false;
         LocalDate findDate = DEFAULT_FIND_DATE;
+        Path export = null;
         Path input = defaultInput;
         Path output = defaultOutput;
         for (int index = 0; index < args.length; index++) {
@@ -53,6 +57,10 @@ public final class CliOptions {
                     index++;
                     findDate = parseDate(valueAt(args, index, argument));
                 }
+                case "--export" -> {
+                    index++;
+                    export = Path.of(valueAt(args, index, argument));
+                }
                 case "--input" -> {
                     index++;
                     input = Path.of(valueAt(args, index, argument));
@@ -64,7 +72,7 @@ public final class CliOptions {
                 default -> throw new IllegalArgumentException("Невідомий аргумент: " + argument);
             }
         }
-        return new CliOptions(help, details, queries, findDate, input, output);
+        return new CliOptions(help, details, queries, findDate, export, input, output);
     }
 
     /* Перетворює текст на дату ISO або повідомляє про помилку формату. */
@@ -118,6 +126,15 @@ public final class CliOptions {
      */
     public LocalDate findDate() {
         return findDate;
+    }
+
+    /**
+     * Повертає шлях для експорту записів у CSV.
+     *
+     * @return шлях із {@code --export} або порожній {@link Optional}
+     */
+    public Optional<Path> export() {
+        return Optional.ofNullable(export);
     }
 
     /**
