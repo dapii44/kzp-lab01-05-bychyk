@@ -65,6 +65,25 @@ class MainTest {
                 normalize(Files.readString(output, StandardCharsets.UTF_8)));
     }
 
+    /* Перевіряє режим --details: базовий звіт не змінюється, додається блок навантаження. */
+    @Test
+    void detailsModeAppendsLoadBlockAndKeepsBaseReport(@TempDir Path dir) throws IOException {
+        Path output = dir.resolve("report.txt");
+
+        int code = Main.run(new String[] {"--details", "--input", "data/input.csv", "--output",
+            output.toString()}, out, err);
+
+        String base = Files.readString(Path.of("src", "test", "resources", "golden",
+                "report-lab01.txt"), StandardCharsets.UTF_8);
+        String details = Files.readString(Path.of("src", "test", "resources", "golden",
+                "report-lab03-details.txt"), StandardCharsets.UTF_8);
+        String actual = normalize(outBytes.toString(StandardCharsets.UTF_8));
+        assertEquals(0, code);
+        assertTrue(actual.startsWith(normalize(base)));
+        assertEquals(normalize(details), actual.substring(normalize(base).length()));
+        assertEquals(actual, normalize(Files.readString(output, StandardCharsets.UTF_8)));
+    }
+
     /* Перевіряє код 2 і повідомлення для відсутнього вхідного файла. */
     @Test
     void missingInputFileGivesErrorCode(@TempDir Path dir) {
