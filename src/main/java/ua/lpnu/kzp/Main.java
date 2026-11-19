@@ -14,7 +14,7 @@ public final class Main {
     static final int EXIT_ERROR = 2;
 
     private static final String USAGE =
-            "Використання: java -jar lab01.jar [--help] [--version] [--input <файл>] [--output <файл>]";
+            "Використання: java -jar lab01.jar [--help] [--version] [--details] [--input <файл>] [--output <файл>]";
     private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
 
@@ -79,6 +79,9 @@ public final class Main {
         }
 
         String report = ReportFormatter.format(stats);
+        if (options.details()) {
+            report += ReportFormatter.formatDetails(stats.trainings());
+        }
         out.print(report);
         try {
             FileReport.writeReport(options.output(), report);

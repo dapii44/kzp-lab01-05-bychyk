@@ -46,4 +46,28 @@ public final class ReportFormatter {
         }
         return report.toString();
     }
+
+    /**
+     * Будує додатковий блок звіту з навантаженням кожного тренування (режим {@code --details}).
+     *
+     * <p>Кожен рядок обчислюється поліморфним викликом {@code load()}; тип тренування лише
+     * відображається, а не використовується для розгалуження.
+     *
+     * @param trainings коректні тренування
+     * @return текст додаткового блоку
+     */
+    public static String formatDetails(List<Training> trainings) {
+        StringBuilder block = new StringBuilder();
+        block.append(String.format(Locale.ROOT, "%nНавантаження за тренуваннями:%n"));
+        for (Training training : trainings) {
+            block.append(String.format(Locale.ROOT, "%s [%s] -> %.2f%n", training,
+                    training.getTrainingKind().isOutdoor() ? "на повітрі" : "у приміщенні",
+                    training.load()));
+        }
+        block.append(String.format(Locale.ROOT, "Загальне навантаження: %.2f%n",
+                TrainingAnalyzer.totalLoad(trainings)));
+        block.append(String.format(Locale.ROOT, "Унікальних тренувань: %d%n",
+                new java.util.HashSet<>(trainings).size()));
+        return block.toString();
+    }
 }

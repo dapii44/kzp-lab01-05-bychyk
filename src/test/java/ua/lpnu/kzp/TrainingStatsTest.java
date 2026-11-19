@@ -155,14 +155,29 @@ class TrainingStatsTest {
         assertEquals(520, stats.maxCalories());
     }
 
-    /* Перевіряє роботу з українськими символами у виді тренування. */
+    /*
+     * Перевіряє роботу з українськими символами у виді тренування. Лабораторна № 3: вид тепер
+     * належить закритій множині enum, тому використано відомий вид у різному регістрі.
+     */
     @Test
     void ukrainianTextIsAccepted() {
         TrainingStats stats = new TrainingStats();
 
-        stats.accept(1, "2026-09-15;Їжакова ходьба Єнота;30;2.50;150");
+        stats.accept(1, "2026-09-15;Біг;30;2.50;150");
+        stats.accept(2, "2026-09-16;БІГ;30;2.50;150");
 
-        assertEquals(1, stats.validCount());
+        assertEquals(2, stats.validCount());
+    }
+
+    /* Перевіряє відхилення виду, якого немає в enum (лабораторна № 3). */
+    @Test
+    void unknownKindIsRejected() {
+        TrainingStats stats = new TrainingStats();
+
+        stats.accept(1, "2026-09-15;Дартс;30;0.00;100");
+
+        assertEquals(0, stats.validCount());
+        assertEquals("Рядок 1: невідомий вид тренування: Дартс", stats.errors().get(0));
     }
 
     /* Перевіряє, що повернений список помилок є копією й не змінює стан. */
