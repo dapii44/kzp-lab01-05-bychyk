@@ -84,6 +84,41 @@ class MainTest {
         assertEquals(actual, normalize(Files.readString(output, StandardCharsets.UTF_8)));
     }
 
+    /* Перевіряє режим --queries на наборі з 8 записів: звіт збігається з еталоном побайтово. */
+    @Test
+    void queriesModeMatchesGoldenReport(@TempDir Path dir) throws IOException {
+        Path output = dir.resolve("report.txt");
+
+        int code = Main.run(new String[] {"--queries", "--input", "data/queries-sample.csv",
+            "--output", output.toString()}, out, err);
+
+        String golden = Files.readString(Path.of("src", "test", "resources", "golden",
+                "report-lab04-sample.txt"), StandardCharsets.UTF_8);
+        assertEquals(0, code);
+        assertEquals(normalize(golden), normalize(outBytes.toString(StandardCharsets.UTF_8)));
+        assertEquals(normalize(golden), normalize(Files.readString(output,
+                StandardCharsets.UTF_8)));
+    }
+
+    /* Перевіряє --find-date: відсутня дата дає «не знайдено», а звіт лишається успішним. */
+    @Test
+    void findDateOptionReportsMissingDate(@TempDir Path dir) {
+        int code = Main.run(new String[] {"--queries", "--find-date", "2026-12-31", "--input",
+            "data/queries-sample.csv", "--output", dir.resolve("r.txt").toString()}, out, err);
+
+        assertEquals(0, code);
+        assertTrue(outBytes.toString(StandardCharsets.UTF_8)
+                .contains("Пошук за датою 2026-12-31: не знайдено"));
+    }
+
+    /* Перевіряє код 2 для хибної дати та для --find-date без значення. */
+    @Test
+    void findDateOptionRejectsBadValue() {
+        assertEquals(2, Main.run(new String[] {"--find-date", "завтра"}, out, err));
+        assertTrue(errBytes.toString(StandardCharsets.UTF_8).contains("Хибна дата"));
+        assertEquals(2, Main.run(new String[] {"--find-date"}, out, err));
+    }
+
     /* Перевіряє код 2 і повідомлення для відсутнього вхідного файла. */
     @Test
     void missingInputFileGivesErrorCode(@TempDir Path dir) {
