@@ -1,5 +1,7 @@
 package ua.lpnu.kzp;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -15,7 +17,7 @@ import java.util.Objects;
 public abstract class Training {
     private static final int FIELD_COUNT = 5;
 
-    private final String date;
+    private final LocalDate date;
     private final TrainingKind kind;
     private final int minutes;
     private final double distanceKm;
@@ -27,7 +29,7 @@ public abstract class Training {
      * <p>Перевірки виконуються в аргументах делегування {@code this(...)}: якщо значення хибне,
      * виняток виникає до присвоєння полів, а частково створений об'єкт не існує.
      *
-     * @param date дата {@code YYYY-MM-DD}; не {@code null} і не порожня
+     * @param date дата {@code YYYY-MM-DD}; не {@code null}, не порожня, існуюча дата
      * @param kind вид тренування; не {@code null}
      * @param minutes тривалість, {@code >= 0}
      * @param distanceKm дистанція, скінченна і {@code >= 0}
@@ -42,7 +44,7 @@ public abstract class Training {
     }
 
     /* Присвоює вже перевірений стан під час внутрішнього делегування. */
-    private Training(String date, TrainingKind kind, int minutes, double distanceKm,
+    private Training(LocalDate date, TrainingKind kind, int minutes, double distanceKm,
             int calories, boolean validated) {
         this.date = date;
         this.kind = kind;
@@ -51,13 +53,17 @@ public abstract class Training {
         this.calories = calories;
     }
 
-    /* Перевіряє, що дата існує й не порожня. */
-    private static String checkDate(String date) {
+    /* Перевіряє, що дата існує, не порожня й є коректною календарною датою ISO. */
+    private static LocalDate checkDate(String date) {
         Objects.requireNonNull(date, "Дата не може бути null");
         if (date.isBlank()) {
             throw new IllegalArgumentException("порожня дата або вид тренування");
         }
-        return date;
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException("поле date має помилковий формат", exception);
+        }
     }
 
     /* Перевіряє, що вид існує. */
@@ -163,11 +169,20 @@ public abstract class Training {
     public abstract double load();
 
     /**
-     * Повертає дату тренування.
+     * Повертає дату тренування як текст ISO (сумісність із попередніми роботами).
      *
      * @return дата у форматі {@code YYYY-MM-DD}
      */
     public final String getDate() {
+        return date.toString();
+    }
+
+    /**
+     * Повертає дату тренування як {@link LocalDate} (лабораторна № 4: запити й пошук).
+     *
+     * @return календарна дата
+     */
+    public final LocalDate getLocalDate() {
         return date;
     }
 

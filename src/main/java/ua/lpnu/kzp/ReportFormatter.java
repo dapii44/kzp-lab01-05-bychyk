@@ -1,7 +1,11 @@
 package ua.lpnu.kzp;
 
+import java.time.LocalDate;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /** Формує текст звіту. Один текст виводиться і в консоль, і у файл. */
 public final class ReportFormatter {
@@ -68,6 +72,43 @@ public final class ReportFormatter {
                 TrainingAnalyzer.totalLoad(trainings)));
         block.append(String.format(Locale.ROOT, "Унікальних тренувань: %d%n",
                 new java.util.HashSet<>(trainings).size()));
+        return block.toString();
+    }
+
+    /**
+     * Будує блок результатів потокових запитів (режим {@code --queries}).
+     *
+     * @param trainings коректні тренування
+     * @param searchDate дата для Optional-пошуку
+     * @return текст додаткового блоку
+     */
+    public static String formatQueries(List<Training> trainings, LocalDate searchDate) {
+        StringBuilder block = new StringBuilder();
+        block.append(String.format(Locale.ROOT, "%nЗапити Stream API:%n"));
+        block.append(String.format(Locale.ROOT, "Тривалість не менша %d хв: %d%n",
+                TrainingQueries.MIN_MINUTES, TrainingQueries.longTrainings(trainings).size()));
+        block.append(String.format(Locale.ROOT, "Дистанції, км: %s%n",
+                TrainingQueries.distances(trainings).stream()
+                        .map(value -> String.format(Locale.ROOT, "%.2f", value))
+                        .collect(Collectors.joining(", ", "[", "]"))));
+        Map<TrainingKind, Double> byKind = TrainingQueries.distanceByKind(trainings);
+        block.append(String.format(Locale.ROOT, "Дистанція за видом, км: %s%n",
+                byKind.entrySet().stream()
+                        .map(entry -> String.format(Locale.ROOT, "%s=%.2f",
+                                entry.getKey().label(), entry.getValue()))
+                        .collect(Collectors.joining(", "))));
+        IntSummaryStatistics calories = TrainingQueries.caloriesStatistics(trainings);
+        block.append(String.format(Locale.ROOT,
+                "Калорії: кількість=%d, мін=%d, макс=%d, середнє=%.2f%n",
+                calories.getCount(), calories.getCount() == 0 ? 0 : calories.getMin(),
+                calories.getCount() == 0 ? 0 : calories.getMax(), calories.getAverage()));
+        block.append(String.format(Locale.ROOT, "Топ-%d за дистанцією:%n", TrainingQueries.TOP_N));
+        for (Training training : TrainingQueries.topByDistance(trainings, TrainingQueries.TOP_N)) {
+            block.append(String.format(Locale.ROOT, "  %s%n", training));
+        }
+        block.append(String.format(Locale.ROOT, "Пошук за датою %s: %s%n", searchDate,
+                TrainingQueries.findByDate(trainings, searchDate)
+                        .map(Training::toString).orElse("не знайдено")));
         return block.toString();
     }
 }

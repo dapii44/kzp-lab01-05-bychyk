@@ -41,12 +41,12 @@ UTF-8, один запис у рядку, поля розділено крапк
 ```text
 ./mvnw verify          # macOS / Ubuntu: компіляція, тести, JAR, SpotBugs
 mvnw.cmd verify        # Windows
-java -jar target/lab01-1.2.0.jar --version
-java -jar target/lab01-1.2.0.jar
-java -jar target/lab01-1.2.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-1.3.0.jar --version
+java -jar target/lab01-1.3.0.jar
+java -jar target/lab01-1.3.0.jar --input data/input.csv --output out/report.txt
 ```
 
-Параметри: `--help`, `--version`, `--details` (додатковий блок із навантаженням) (версія з номером збірки, наприклад `1.0.0+local` локально
+Параметри: `--help`, `--version`, `--details` (блок із навантаженням), `--queries` (результати потокових запитів), `--find-date <РРРР-ММ-ДД>` (дата для Optional-пошуку) (версія з номером збірки, наприклад `1.0.0+local` локально
 і `1.0.0+42` у CI), `--input <файл>`, `--output <файл>`.
 
 Коди завершення: `0` — успіх; `1` — у файлі немає жодного коректного запису; `2` — хибні
@@ -84,6 +84,26 @@ TrainingKind (enum)  ── підпис, ознака «на повітрі», 
 - Рівність: той самий клас і всі п'ять полів (`Double.compare` для дистанції).
 - Зовнішній звіт не змінився (побайтово, `md5 5b9b4686…`); `--details` лише додає блок.
 
+## Потокові запити (лабораторна робота № 4)
+
+`TrainingQueries` містить п'ять запитів над `List<Training>` і `Optional`-пошук; циклів і перевірок
+підтипу немає, вхідний список не змінюється.
+
+| Запит | Метод | Операції |
+| --- | --- | --- |
+| 1 | `longTrainings` | `filter` (тривалість ≥ 45 хв) |
+| 2 | `distances` | `map` (дистанції) |
+| 3 | `distanceByKind` | `groupingBy` + `summingDouble`, `EnumMap` |
+| 4 | `caloriesStatistics` | `summarizingInt` (у моделі немає пульсу — калорії) |
+| 5 | `topByDistance(list, n)` | `comparingDouble.reversed().thenComparing(date)`, `sorted`, `limit` |
+| + | `findByDate` | `filter` + `findFirst` → `Optional` |
+
+`n = 0` — порожній результат, завеликий `n` — усі елементи, `n < 0` — `IllegalArgumentException`.
+Дату тренування переведено на `LocalDate`. Приклад із 8 записами:
+`java -jar target/lab01-1.3.0.jar --queries --input data/queries-sample.csv`
+(еталон: `src/test/resources/golden/report-lab04-sample.txt`). Звіт без прапорців
+побайтово збігається з лабораторними № 1–3.
+
 ## Приклад
 
 ```text
@@ -103,8 +123,9 @@ TrainingKind (enum)  ── підпис, ознака «на повітрі», 
 
 ```text
 ├── data/input.csv                     # контрольні дані (5 коректних і 4 хибні рядки)
+├── data/queries-sample.csv            # 8 коректних записів для запитів (лаб. № 4)
 ├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, Training, IndoorTraining,
-│                                      # OutdoorTraining, TrainingKind, DurationDistance,
+│                                      # OutdoorTraining, TrainingKind, TrainingQueries, DurationDistance,
 │                                      # TrainingSummary, TrainingAnalyzer, TrainingStats,
 │                                      # ReportFormatter, FileReport, BuildInfo
 ├── src/main/resources/version.properties

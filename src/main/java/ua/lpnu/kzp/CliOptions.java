@@ -1,18 +1,28 @@
 package ua.lpnu.kzp;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /** Зберігає розібрані аргументи командного рядка. */
 public final class CliOptions {
+    /** Дата Optional-пошуку за замовчуванням (одна з дат контрольних даних). */
+    public static final LocalDate DEFAULT_FIND_DATE = LocalDate.of(2026, 9, 5);
+
     private final boolean help;
     private final boolean details;
+    private final boolean queries;
+    private final LocalDate findDate;
     private final Path input;
     private final Path output;
 
     /* Створює набір параметрів; використовується лише методом parse. */
-    private CliOptions(boolean help, boolean details, Path input, Path output) {
+    private CliOptions(boolean help, boolean details, boolean queries, LocalDate findDate,
+            Path input, Path output) {
         this.help = help;
         this.details = details;
+        this.queries = queries;
+        this.findDate = findDate;
         this.input = input;
         this.output = output;
     }
@@ -29,6 +39,8 @@ public final class CliOptions {
     public static CliOptions parse(String[] args, Path defaultInput, Path defaultOutput) {
         boolean help = false;
         boolean details = false;
+        boolean queries = false;
+        LocalDate findDate = DEFAULT_FIND_DATE;
         Path input = defaultInput;
         Path output = defaultOutput;
         for (int index = 0; index < args.length; index++) {
@@ -36,6 +48,11 @@ public final class CliOptions {
             switch (argument) {
                 case "--help" -> help = true;
                 case "--details" -> details = true;
+                case "--queries" -> queries = true;
+                case "--find-date" -> {
+                    index++;
+                    findDate = parseDate(valueAt(args, index, argument));
+                }
                 case "--input" -> {
                     index++;
                     input = Path.of(valueAt(args, index, argument));
@@ -47,7 +64,16 @@ public final class CliOptions {
                 default -> throw new IllegalArgumentException("Невідомий аргумент: " + argument);
             }
         }
-        return new CliOptions(help, details, input, output);
+        return new CliOptions(help, details, queries, findDate, input, output);
+    }
+
+    /* Перетворює текст на дату ISO або повідомляє про помилку формату. */
+    private static LocalDate parseDate(String text) {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException("Хибна дата для --find-date: " + text, exception);
+        }
     }
 
     /* Повертає значення параметра або повідомляє, що його немає. */
@@ -74,6 +100,24 @@ public final class CliOptions {
      */
     public boolean details() {
         return details;
+    }
+
+    /**
+     * Повертає ознаку режиму {@code --queries} (блок результатів потокових запитів).
+     *
+     * @return {@code true}, якщо потрібно додати блок запитів
+     */
+    public boolean queries() {
+        return queries;
+    }
+
+    /**
+     * Повертає дату для Optional-пошуку.
+     *
+     * @return значення {@code --find-date} або {@link #DEFAULT_FIND_DATE}
+     */
+    public LocalDate findDate() {
+        return findDate;
     }
 
     /**
