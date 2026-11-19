@@ -22,7 +22,7 @@ UTF-8, один запис у рядку, поля розділено крапк
 | Поле | Тип | Правило |
 | --- | --- | --- |
 | `date` | String | не порожнє, формат `YYYY-MM-DD` (розбір дати не вимагається) |
-| `kind` | String | не порожнє |
+| `kind` | String | один із видів `TrainingKind` (регістр не важливий): Біг, Велосипед, Ходьба, Плавання, Йога, Силове |
 | `minutes` | int | ціле, `>= 0` |
 | `distanceKm` | double | скінченне, `>= 0` |
 | `calories` | int | ціле, `>= 0` |
@@ -41,18 +41,18 @@ UTF-8, один запис у рядку, поля розділено крапк
 ```text
 ./mvnw verify          # macOS / Ubuntu: компіляція, тести, JAR, SpotBugs
 mvnw.cmd verify        # Windows
-java -jar target/lab01-1.1.0.jar --version
-java -jar target/lab01-1.1.0.jar
-java -jar target/lab01-1.1.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-1.2.0.jar --version
+java -jar target/lab01-1.2.0.jar
+java -jar target/lab01-1.2.0.jar --input data/input.csv --output out/report.txt
 ```
 
-Параметри: `--help`, `--version` (версія з номером збірки, наприклад `1.0.0+local` локально
+Параметри: `--help`, `--version`, `--details` (додатковий блок із навантаженням) (версія з номером збірки, наприклад `1.0.0+local` локально
 і `1.0.0+42` у CI), `--input <файл>`, `--output <файл>`.
 
 Коди завершення: `0` — успіх; `1` — у файлі немає жодного коректного запису; `2` — хибні
 аргументи або помилка читання/запису файла.
 
-## Модель даних (лабораторна робота № 2)
+## Модель даних (лабораторна робота № 2; у № 3 `Training` став абстрактним)
 
 | Тип | Призначення |
 | --- | --- |
@@ -66,6 +66,23 @@ java -jar target/lab01-1.1.0.jar --input data/input.csv --output out/report.txt
 `distanceKm >= 0` і скінченне; `calories >= 0`. Фабрика `fromCsv` відповідає за кількість полів
 і розбір чисел, конструктор — за інваріанти, тому правила не можна обійти.
 Зовнішній звіт не змінився (еталон: `src/test/resources/golden/report-lab01.txt`).
+
+## Ієрархія тренувань (лабораторна робота № 3)
+
+```text
+Training (abstract)  ── спільні поля, інваріанти, equals/hashCode/toString, abstract load()
+ ├── OutdoorTraining ── Біг, Велосипед, Ходьба:  хв × інтенсивність + км × 5 + ккал × 0.05
+ └── IndoorTraining  ── Плавання, Йога, Силове:  хв × інтенсивність + ккал × 0.05
+TrainingKind (enum)  ── підпис, ознака «на повітрі», інтенсивність
+```
+
+- Базовий тип — **абстрактний клас**: підтипи мають спільний стан і перевірки (відношення
+  «є різновидом»), тому спадкування виправдане; композиція не потрібна.
+- Підтип обирає фабрика `Training.create/fromCsv` за `TrainingKind.isOutdoor()`; далі код працює
+  зі спільним типом `Training`. Центрального `if`/`switch` за підтипом немає:
+  `TrainingAnalyzer.totalLoad` і `ReportFormatter.formatDetails` викликають `load()`.
+- Рівність: той самий клас і всі п'ять полів (`Double.compare` для дистанції).
+- Зовнішній звіт не змінився (побайтово, `md5 5b9b4686…`); `--details` лише додає блок.
 
 ## Приклад
 
@@ -86,7 +103,8 @@ java -jar target/lab01-1.1.0.jar --input data/input.csv --output out/report.txt
 
 ```text
 ├── data/input.csv                     # контрольні дані (5 коректних і 4 хибні рядки)
-├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, Training, DurationDistance,
+├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, Training, IndoorTraining,
+│                                      # OutdoorTraining, TrainingKind, DurationDistance,
 │                                      # TrainingSummary, TrainingAnalyzer, TrainingStats,
 │                                      # ReportFormatter, FileReport, BuildInfo
 ├── src/main/resources/version.properties
