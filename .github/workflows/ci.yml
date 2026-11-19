@@ -1,0 +1,64 @@
+# Один workflow перевіряє однаковий commit на трьох операційних системах.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Отримуємо код commit або Pull Request.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Встановлюємо однаковий JDK 21 і кешуємо залежності Maven.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # На macOS та Ubuntu Wrapper запускають як Unix-скрипт.
+      # Номер запуску потрапляє до version.properties і виводу --version.
+      # Фаза verify виконує всі попередні: компіляцію, тести JUnit, package (JAR), а потім SpotBugs.
+      - name: Verify on Unix
+        if: runner.os != 'Windows'
+        run: ./mvnw -B verify "-Dbuild.number=${{ github.run_number }}"
+
+      # На Windows використовується окремий cmd-скрипт Wrapper.
+      # Лапки не дають PowerShell розбити аргумент -D на частини.
+      - name: Verify on Windows
+        if: runner.os == 'Windows'
+        run: .\mvnw.cmd -B verify "-Dbuild.number=${{ github.run_number }}"
+
+      # Запускаємо зібраний JAR: версія з номером збірки CI і звіт на контрольних даних.
+      - name: Smoke-test JAR
+        shell: bash
+        run: |
+          jar_file=$(ls target/lab01-*.jar | grep -v original- | head -n 1)
+          echo "JAR: $jar_file"
+          version="$(java -jar "$jar_file" --version | tr -d '\r')"
+          echo "Версія: $version"
+          echo "$version" | grep -E "^[0-9]+\.[0-9]+\.[0-9]+\+${{ github.run_number }}$"
+          java -jar "$jar_file" --input data/input.csv --output out/report.txt
+          test -s out/report.txt
+
+      # Кожна ОС отримує власний артефакт, щоб результати не перезаписувалися.
+      - name: Upload JAR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-${{ matrix.os }}-${{ github.run_number }}
+          path: target/*.jar
+          if-no-files-found: error
