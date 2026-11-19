@@ -3,7 +3,7 @@
 **Розгортання Java-проєкту та базова обробка даних**
 Курс «Кросплатформні засоби програмування», Національний університет «Львівська політехніка»,
 кафедра електронних обчислювальних машин.
-Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk>
+Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/dapii44/kzp-lab01-bychyk>
 
 ## 1. Тема, номер і варіант
 
@@ -150,9 +150,9 @@ SpotBugs у середовищі розробки не запускався (й�
 еталонний звіт, формат версії.
 
 **CI (рівень 3):** посилання на запуск workflow та артефакти JAR для трьох ОС —
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/actions> (заповнюється після першого push;
+<https://github.com/dapii44/kzp-lab01-bychyk/actions> (заповнюється після першого push;
 артефакти `jar-ubuntu-latest-N`, `jar-windows-latest-N`, `jar-macos-latest-N`).
-Тег: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/releases/tag/v1.0.0>.
+Тег: <https://github.com/dapii44/kzp-lab01-bychyk/releases/tag/v1.0.0>.
 
 ## 9. Документація
 

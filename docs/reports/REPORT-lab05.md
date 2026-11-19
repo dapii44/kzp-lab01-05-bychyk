@@ -2,7 +2,7 @@
 
 **Параметризоване сховище, анотації, рефлексія та CSV у Java-проєкті**
 Курс «Кросплатформні засоби програмування», Національний університет «Львівська політехніка».
-Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk>
+Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/dapii44/kzp-lab01-bychyk>
 (гілка `lab05`, Pull Request № 39, тег `v1.4.0`).
 
 ## 1. Тема, номер і варіант
@@ -196,8 +196,8 @@ java -jar target/lab01-1.4.0.jar --export out/trainings.csv         # Експо
 Локально повний `mvnw verify` і SpotBugs **не виконувалися**: Maven Central у робочому середовищі
 заблоковано; використано еквівалентну перевірку. Підтвердження `mvnw verify` і `package` на
 Ubuntu, Windows, macOS — GitHub Actions:
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/actions>; тег
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/releases/tag/v1.4.0>. Кодування й роздільники
+<https://github.com/dapii44/kzp-lab01-bychyk/actions>; тег
+<https://github.com/dapii44/kzp-lab01-bychyk/releases/tag/v1.4.0>. Кодування й роздільники
 рядків: запис завжди UTF-8 і `\n`, парсер приймає `\r\n`; тест `crlfFileIsReadTheSame` імітує
 файл, збережений у Windows, а CI виконує всі тести на Windows і macOS.
 

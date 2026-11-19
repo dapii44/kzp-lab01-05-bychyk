@@ -2,7 +2,7 @@
 
 **Потокова обробка колекцій у Java: Stream API, collectors і Optional**
 Курс «Кросплатформні засоби програмування», Національний університет «Львівська політехніка».
-Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk>
+Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/dapii44/kzp-lab01-bychyk>
 (гілка `lab04`, Pull Request № 31, тег `v1.3.0`).
 
 ## 1. Тема, номер і варіант
@@ -161,8 +161,8 @@ java -jar target/lab01-1.3.0.jar --queries --input data/queries-sample.csv
 Локально повний `mvnw verify` і SpotBugs **не виконувалися**: Maven Central у робочому середовищі
 заблоковано; використано еквівалентну перевірку (`javac -Werror`, JUnit Console, збірка JAR).
 Підтвердження `mvnw verify` на Ubuntu, Windows і macOS — GitHub Actions:
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/actions>; тег
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/releases/tag/v1.3.0>.
+<https://github.com/dapii44/kzp-lab01-bychyk/actions>; тег
+<https://github.com/dapii44/kzp-lab01-bychyk/releases/tag/v1.3.0>.
 
 ## 12. GitHub Issues і Pull Request
 

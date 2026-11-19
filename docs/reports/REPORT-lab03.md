@@ -2,7 +2,7 @@
 
 **Спадкування, інтерфейси й поліморфізм у Java-проєкті**
 Курс «Кросплатформні засоби програмування», Національний університет «Львівська політехніка».
-Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk>
+Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/dapii44/kzp-lab01-bychyk>
 (гілка `lab03`, Pull Request № 21, тег `v1.2.0`).
 
 ## 1. Тема, номер і варіант
@@ -137,8 +137,8 @@ java -jar target/lab01-1.2.0.jar --details                # звіт + блок 
 Локально повний `mvnw verify` і SpotBugs **не виконувалися**: у робочому середовищі Maven
 Central заблоковано. Замість нього використано еквівалентну перевірку (`javac -Werror`, JUnit
 Console, збірка JAR). `mvnw verify` зі SpotBugs підтверджує CI:
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/actions>; тег
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/releases/tag/v1.2.0>.
+<https://github.com/dapii44/kzp-lab01-bychyk/actions>; тег
+<https://github.com/dapii44/kzp-lab01-bychyk/releases/tag/v1.2.0>.
 
 ## 11. GitHub Issues і Pull Request
 

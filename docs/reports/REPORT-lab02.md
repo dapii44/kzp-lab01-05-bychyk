@@ -2,7 +2,7 @@
 
 **Класи, record і інкапсуляція в Java-проєкті**
 Курс «Кросплатформні засоби програмування», Національний університет «Львівська політехніка».
-Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk>
+Виконав: Бичик Вадім, група КІ-304. Репозиторій: <https://github.com/dapii44/kzp-lab01-bychyk>
 (гілка `lab02`, Pull Request № 14, тег `v1.1.0`).
 
 ## 1. Тема, номер і варіант
@@ -86,8 +86,8 @@ java -jar target/lab01-1.1.0.jar --version                # 1.1.0+local
 ```
 
 Повний `mvnw verify` (з SpotBugs) виконується в GitHub Actions на трьох ОС:
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/actions>; тег
-<https://github.com/GITHUB_LOGIN/kzp-lab01-bychyk/releases/tag/v1.1.0>.
+<https://github.com/dapii44/kzp-lab01-bychyk/actions>; тег
+<https://github.com/dapii44/kzp-lab01-bychyk/releases/tag/v1.1.0>.
 
 ## 8. GitHub Issues і Pull Request
 
