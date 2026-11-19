@@ -49,9 +49,9 @@ class TrainingSummaryTest {
     @Test
     void analyzerComputesFourIndicatorsWithoutChangingInput() {
         List<Training> trainings = List.of(
-                new Training("2026-09-01", "Біг", 45, 7.5, 520),
-                new Training("2026-09-03", "Велосипед", 90, 28.4, 780),
-                new Training("2026-09-05", "Плавання", 60, 2.0, 450));
+                Training.create("2026-09-01", "Біг", 45, 7.5, 520),
+                Training.create("2026-09-03", "Велосипед", 90, 28.4, 780),
+                Training.create("2026-09-05", "Плавання", 60, 2.0, 450));
 
         TrainingSummary summary = TrainingAnalyzer.summarize(trainings);
 

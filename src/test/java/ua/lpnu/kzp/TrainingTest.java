@@ -10,7 +10,7 @@ class TrainingTest {
     /* Перевіряє, що коректний конструктор зберігає всі поля. */
     @Test
     void constructorStoresAllFields() {
-        Training training = new Training("2026-09-01", "Біг", 45, 7.5, 520);
+        Training training = Training.create("2026-09-01", "Біг", 45, 7.5, 520);
 
         assertEquals("2026-09-01", training.getDate());
         assertEquals("Біг", training.getKind());
@@ -22,7 +22,7 @@ class TrainingTest {
     /* Перевіряє, що нуль є допустимою межею для всіх числових полів. */
     @Test
     void zeroValuesAreBoundaryAndAccepted() {
-        Training training = new Training("2026-09-07", "Йога", 0, 0.0, 0);
+        Training training = Training.create("2026-09-07", "Йога", 0, 0.0, 0);
 
         assertEquals(0, training.getMinutes());
         assertEquals(0.0, training.getDistanceKm(), 0.0001);
@@ -32,31 +32,31 @@ class TrainingTest {
     /* Перевіряє відмінність null від порожнього тексту. */
     @Test
     void nullAndBlankTextAreRejectedDifferently() {
-        assertThrows(NullPointerException.class, () -> new Training(null, "Біг", 1, 1.0, 1));
-        assertThrows(NullPointerException.class, () -> new Training("2026-09-01", null, 1, 1.0, 1));
-        assertThrows(IllegalArgumentException.class, () -> new Training("", "Біг", 1, 1.0, 1));
+        assertThrows(NullPointerException.class, () -> Training.create(null, "Біг", 1, 1.0, 1));
+        assertThrows(NullPointerException.class, () -> Training.create("2026-09-01", null, 1, 1.0, 1));
+        assertThrows(IllegalArgumentException.class, () -> Training.create("", "Біг", 1, 1.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "  ", 1, 1.0, 1));
+                () -> Training.create("2026-09-01", "  ", 1, 1.0, 1));
     }
 
     /* Перевіряє відхилення від'ємних значень у кожному числовому полі. */
     @Test
     void negativeNumbersAreRejected() {
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "Біг", -1, 1.0, 1));
+                () -> Training.create("2026-09-01", "Біг", -1, 1.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "Біг", 1, -0.01, 1));
+                () -> Training.create("2026-09-01", "Біг", 1, -0.01, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "Біг", 1, 1.0, -1));
+                () -> Training.create("2026-09-01", "Біг", 1, 1.0, -1));
     }
 
     /* Перевіряє відхилення NaN і нескінченності. */
     @Test
     void nonFiniteDistanceIsRejected() {
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "Біг", 1, Double.NaN, 1));
+                () -> Training.create("2026-09-01", "Біг", 1, Double.NaN, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Training("2026-09-01", "Біг", 1, Double.POSITIVE_INFINITY, 1));
+                () -> Training.create("2026-09-01", "Біг", 1, Double.POSITIVE_INFINITY, 1));
     }
 
     /* Перевіряє створення об'єкта з коректного CSV-рядка. */
@@ -121,7 +121,7 @@ class TrainingTest {
         try {
             Locale.setDefault(Locale.GERMANY);
 
-            String text = new Training("2026-09-01", "Біг", 45, 7.5, 520).toString();
+            String text = Training.create("2026-09-01", "Біг", 45, 7.5, 520).toString();
 
             assertEquals("2026-09-01, Біг: 45 хв, 7.50 км, 520 ккал", text);
         } finally {
