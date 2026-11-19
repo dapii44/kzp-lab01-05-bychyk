@@ -41,12 +41,12 @@ UTF-8, один запис у рядку, поля розділено крапк
 ```text
 ./mvnw verify          # macOS / Ubuntu: компіляція, тести, JAR, SpotBugs
 mvnw.cmd verify        # Windows
-java -jar target/lab01-1.3.0.jar --version
-java -jar target/lab01-1.3.0.jar
-java -jar target/lab01-1.3.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-1.4.0.jar --version
+java -jar target/lab01-1.4.0.jar
+java -jar target/lab01-1.4.0.jar --input data/input.csv --output out/report.txt
 ```
 
-Параметри: `--help`, `--version`, `--details` (блок із навантаженням), `--queries` (результати потокових запитів), `--find-date <РРРР-ММ-ДД>` (дата для Optional-пошуку) (версія з номером збірки, наприклад `1.0.0+local` локально
+Параметри: `--help`, `--version`, `--details` (блок із навантаженням), `--queries` (результати потокових запитів), `--find-date <РРРР-ММ-ДД>` (дата для Optional-пошуку), `--export <файл.csv>` (збереження у CSV і перевірка round-trip) (версія з номером збірки, наприклад `1.0.0+local` локально
 і `1.0.0+42` у CI), `--input <файл>`, `--output <файл>`.
 
 Коди завершення: `0` — успіх; `1` — у файлі немає жодного коректного запису; `2` — хибні
@@ -100,9 +100,43 @@ TrainingKind (enum)  ── підпис, ознака «на повітрі», 
 
 `n = 0` — порожній результат, завеликий `n` — усі елементи, `n < 0` — `IllegalArgumentException`.
 Дату тренування переведено на `LocalDate`. Приклад із 8 записами:
-`java -jar target/lab01-1.3.0.jar --queries --input data/queries-sample.csv`
+`java -jar target/lab01-1.4.0.jar --queries --input data/queries-sample.csv`
 (еталон: `src/test/resources/golden/report-lab04-sample.txt`). Звіт без прапорців
 побайтово збігається з лабораторними № 1–3.
+
+## Збереження у CSV (лабораторна робота № 5)
+
+```text
+Repository<T> → @CsvColumn → CsvExporter (рефлексія) → UTF-8 CSV → CsvParser → TrainingRecord
+```
+
+| Тип | Призначення |
+| --- | --- |
+| `Repository<T>` | типобезпечне сховище: `add`, `addAll`, `all()` (незмінний знімок), `find(Predicate<? super T>)` |
+| `@CsvColumn("назва")` | `@Retention(RUNTIME)`, `@Target(FIELD)`: назва стовпця для поля |
+| `CsvExporter` | універсальний: `write(Path, Class<T>, List<? extends T>)`; не знає предметних класів |
+| `CsvParser` | автомат над усім документом: коми, лапки й перенесення рядка в лапках |
+| `TrainingRecord` | запис для CSV (`date`, `kind`, `durationMinutes`, `distanceKm`, `calories`, `note`), власна валідація й `fromColumns` |
+| `TrainingCsvStore` | `save(Path, Repository)` / `load(Path)` — предметне відновлення |
+| `DataStorageException` | checked-виняток із `cause` (`IOException`, `NumberFormatException`, …) |
+
+Формат: UTF-8 без BOM, перший рядок — заголовок, кінець рядка `\n`; поле з комою, лапкою або
+перенесенням рядка береться в `"…"`, лапка подвоюється. Стовпці йдуть за **алфавітом Java-імен
+полів** (`calories`, `date`, `distanceKm`, `durationMinutes`, `kind`, `note`), назви беруться з
+анотації. Порожній файл і файл лише із заголовком дають порожнє сховище.
+
+```text
+калорії,дата,дистанція,тривалість,вид,нотатка
+520,2026-09-01,7.5,45,RUNNING,Ранкова пробіжка
+780,2026-09-03,28.4,90,CYCLING,"Маршрут: парк, річка"
+450,2026-09-05,2.0,60,SWIMMING,"Тренер сказав: ""ще круг"""
+180,2026-09-07,0.0,50,YOGA,"Розтяжка
+дихання"
+```
+
+Експорт із CLI: `java -jar target/lab01-1.4.0.jar --export out/trainings.csv` (записує коректні
+тренування, читає файл назад і підтверджує збіг). Еталони — `src/test/resources/csv/`.
+Уточнення варіанта: замість пульсу — калорії; додано поле `note` для тексту з комою й лапками.
 
 ## Приклад
 
@@ -124,8 +158,11 @@ TrainingKind (enum)  ── підпис, ознака «на повітрі», 
 ```text
 ├── data/input.csv                     # контрольні дані (5 коректних і 4 хибні рядки)
 ├── data/queries-sample.csv            # 8 коректних записів для запитів (лаб. № 4)
+├── src/test/resources/csv/            # еталонні CSV: зразок, порожній, лише заголовок, хибний
 ├── src/main/java/ua/lpnu/kzp/         # Main, CliOptions, Training, IndoorTraining,
-│                                      # OutdoorTraining, TrainingKind, TrainingQueries, DurationDistance,
+│                                      # OutdoorTraining, TrainingKind, TrainingQueries, Repository,
+│                                      # CsvColumn, CsvExporter, CsvParser, TrainingRecord,
+│                                      # TrainingCsvStore, DataStorageException, DurationDistance,
 │                                      # TrainingSummary, TrainingAnalyzer, TrainingStats,
 │                                      # ReportFormatter, FileReport, BuildInfo
 ├── src/main/resources/version.properties

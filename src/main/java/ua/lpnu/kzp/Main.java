@@ -15,7 +15,7 @@ public final class Main {
 
     private static final String USAGE =
             "Використання: java -jar lab01.jar [--help] [--version] [--details] [--queries]"
-                    + " [--find-date <РРРР-ММ-ДД>] [--input <файл>] [--output <файл>]";
+                    + " [--find-date <РРРР-ММ-ДД>] [--export <файл.csv>] [--input <файл>] [--output <файл>]";
     private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
 
@@ -94,10 +94,38 @@ public final class Main {
             return EXIT_ERROR;
         }
 
+        if (options.export().isPresent()) {
+            int exportCode = exportCsv(options.export().get(), stats.trainings(), out, err);
+            if (exportCode != 0) {
+                return exportCode;
+            }
+        }
+
         if (stats.validCount() == 0) {
             err.println("У вхідному файлі немає жодного коректного запису");
             return EXIT_NO_VALID_RECORDS;
         }
+        return 0;
+    }
+
+    /* Експортує коректні тренування у CSV, читає файл назад і перевіряє round-trip. */
+    private static int exportCsv(Path target, List<Training> trainings, PrintStream out,
+            PrintStream err) {
+        Repository<TrainingRecord> repository = new Repository<>();
+        trainings.stream().map(TrainingRecord::of).forEach(repository::add);
+        try {
+            TrainingCsvStore.save(target, repository);
+            Repository<TrainingRecord> restored = TrainingCsvStore.load(target);
+            if (!restored.all().equals(repository.all())) {
+                err.printf("Round-trip не збігся для %s%n", target);
+                return EXIT_ERROR;
+            }
+        } catch (DataStorageException exception) {
+            err.printf("%s%n", exception.getMessage());
+            return EXIT_ERROR;
+        }
+        out.printf("Експортовано записів: %d -> %s (round-trip: збігається)%n",
+                repository.size(), target);
         return 0;
     }
 }

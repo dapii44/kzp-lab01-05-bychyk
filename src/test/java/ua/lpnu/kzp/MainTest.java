@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -117,6 +118,35 @@ class MainTest {
         assertEquals(2, Main.run(new String[] {"--find-date", "завтра"}, out, err));
         assertTrue(errBytes.toString(StandardCharsets.UTF_8).contains("Хибна дата"));
         assertEquals(2, Main.run(new String[] {"--find-date"}, out, err));
+    }
+
+    /* Перевіряє --export: файл створено, round-trip підтверджено, базовий звіт не змінено. */
+    @Test
+    void exportOptionWritesCsvAndConfirmsRoundTrip(@TempDir Path dir) throws IOException {
+        Path csv = dir.resolve("export").resolve("trainings.csv");
+
+        int code = Main.run(new String[] {"--export", csv.toString(), "--input",
+            "data/queries-sample.csv", "--output", dir.resolve("r.txt").toString()}, out, err);
+
+        List<String> lines = Files.readAllLines(csv, StandardCharsets.UTF_8);
+        assertEquals(0, code);
+        assertEquals(9, lines.size());
+        assertEquals("калорії,дата,дистанція,тривалість,вид,нотатка", lines.get(0));
+        assertTrue(outBytes.toString(StandardCharsets.UTF_8)
+                .contains("Експортовано записів: 8"));
+        assertTrue(outBytes.toString(StandardCharsets.UTF_8).contains("round-trip: збігається"));
+    }
+
+    /* Перевіряє --export у недоступне місце: код 2, повідомлення про помилку запису. */
+    @Test
+    void exportToBlockedPathReturnsError(@TempDir Path dir) throws IOException {
+        Path blocker = Files.writeString(dir.resolve("blocker"), "файл");
+
+        int code = Main.run(new String[] {"--export", blocker.resolve("x.csv").toString(),
+            "--input", "data/input.csv", "--output", dir.resolve("r.txt").toString()}, out, err);
+
+        assertEquals(2, code);
+        assertTrue(errBytes.toString(StandardCharsets.UTF_8).contains("Не вдалося записати CSV"));
     }
 
     /* Перевіряє код 2 і повідомлення для відсутнього вхідного файла. */
