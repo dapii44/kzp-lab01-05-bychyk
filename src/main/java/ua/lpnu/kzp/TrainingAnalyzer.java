@@ -16,14 +16,10 @@ public final class TrainingAnalyzer {
      * @return незмінний підсумок; для порожнього списку — нулі
      */
     public static TrainingSummary summarize(List<Training> trainings) {
-        long totalMinutes = 0;
-        double totalDistanceKm = 0.0;
-        int maxCalories = 0;
-        for (Training training : trainings) {
-            totalMinutes += training.getMinutes();
-            totalDistanceKm += training.getDistanceKm();
-            maxCalories = Math.max(maxCalories, training.getCalories());
-        }
+        // Лабораторна № 4: цикл замінено на потокові термінальні операції (по одній на показник).
+        long totalMinutes = trainings.stream().mapToLong(Training::getMinutes).sum();
+        double totalDistanceKm = trainings.stream().mapToDouble(Training::getDistanceKm).sum();
+        int maxCalories = trainings.stream().mapToInt(Training::getCalories).max().orElse(0);
         return new TrainingSummary(trainings.size(),
                 new DurationDistance(totalMinutes, totalDistanceKm), maxCalories);
     }
@@ -38,10 +34,6 @@ public final class TrainingAnalyzer {
      * @return сума навантажень; 0 для порожнього списку
      */
     public static double totalLoad(List<? extends Training> trainings) {
-        double total = 0.0;
-        for (Training training : trainings) {
-            total += training.load();
-        }
-        return total;
+        return trainings.stream().mapToDouble(Training::load).sum();
     }
 }
